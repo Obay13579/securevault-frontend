@@ -12,7 +12,7 @@ const HomeLogin = () => {
                 alt="logo"
             />
         </div>
-        <a className="text-gray-200 text-xl font-semibold font-[family-name:var(--font-now)] m-1">SECURE VAULT</a>
+        <p className="text-gray-200 text-xl font-semibold font-[family-name:var(--font-now)] m-1">SECURE VAULT</p>
     </Link>
   )
 }
