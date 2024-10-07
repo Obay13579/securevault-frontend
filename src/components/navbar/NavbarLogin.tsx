@@ -13,15 +13,9 @@ const NavbarLogin = () => {
             <div className="navbar-center flex">
                 {/* Visible on larger screens, hidden on mobile */}
                 <div className="text-xl hidden sm:flex">
-                    <Link href="/upload" className="p-2">
-                        Upload
-                    </Link>
-                    <Link href="/gallery" className="p-2">
-                        Galleries
-                    </Link>
-                    <Link href="/about" className="p-2">
-                        About Us
-                    </Link>
+                    <Link href="/upload" className="p-2"> Upload </Link>
+                    <Link href="/gallery" className="p-2"> Galleries </Link>
+                    <Link href="/about" className="p-2"> About Us </Link>
                 </div>
 
                 {/* Dropdown menu for mobile */}
@@ -55,32 +49,32 @@ const NavbarLogin = () => {
                 </div>
             <div className="navbar-end">
                 <div className="dropdown dropdown-end">
-                <div
-                    tabIndex={0}
-                    role="button"
-                    className="btn btn-ghost btn-circle avatar mr-1 ml-1 mt-1 mb-1"
-                >
-                    <div className="w-10 rounded-full">
-                    <Image
-                        src={Pp}
-                        alt="User Avatar"
-                    />
+                    <div
+                        tabIndex={0}
+                        role="button"
+                        className="btn btn-ghost btn-circle avatar"
+                    >
+                        <div className="w-10 rounded-full">
+                        <Image
+                            src={Pp}
+                            alt="User Avatar"
+                        />
+                        </div>
                     </div>
-                </div>
-                <ul
-                    tabIndex={0}
-                    className="text-gray-200 menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
-                    style={{ backgroundColor: '#2E073F' }}
-                >
-                    <li>
-                        <a className="justify-between">Profile</a>
-                    </li>
-                    <li>
-                        <Link href="/">  
-                            Logout
-                        </Link>
-                    </li>
-                </ul>
+                    <ul
+                        tabIndex={0}
+                        className="text-gray-200 menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                        style={{ backgroundColor: '#2E073F' }}
+                    >
+                        <li>
+                            <Link href="/profile" className="justify-between">Profile</Link>
+                        </li>
+                        <li>
+                            <Link href="/">  
+                                Logout
+                            </Link>
+                        </li>
+                    </ul>
                 </div>
             </div>         
         </div>
