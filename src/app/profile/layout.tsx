@@ -9,16 +9,14 @@ export const metadata = {
   title: "Secure-Vault",
 };
 
-export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <body className={`${Now.variable} antialiased`}>
-        <main>
-          <div>
-            {children}
-          </div>
-        </main>
-      </body>
+      <body className={`${Now.variable} antialiased`}>{children}</body>
     </html>
   );
 }

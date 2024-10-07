@@ -8,24 +8,16 @@ const Now = localFont({
 
 export const metadata = {
   title: "Secure-Vault",
-  icons:{
-    icon:[
-      {
-        url:"/favicon.ico",
-        href:"/favicon.ico",
-      }
-    ]
-  }
 };
 
-export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <body className={`${Now.variable} antialiased`}>
-        <main>
-          {children}
-        </main>
-      </body>
+      <body className={`${Now.variable} antialiased`}>{children}</body>
     </html>
   );
 }
