@@ -25,7 +25,7 @@ export const Login = () => {
                     <input type="text" placeholder="Password" className="input input-bordered w-full max-w-xs" />
                     <div className="label">
                         <Link href="/auth/register" className="link link-hover">
-                            <span className="text-gray-300 label-text-alt text-sm">Didn't have an account ?</span>
+                            <span className="text-gray-300 label-text-alt text-sm">Didn&apos;t have an account ?</span>
                         </Link>
                     </div>
                 </label>
