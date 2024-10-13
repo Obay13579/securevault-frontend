@@ -1,24 +1,61 @@
-import React from "react";
+'use client';
+
+import React, { useState, useEffect } from "react";
 import Link from 'next/link';
+import Image from "next/image";
+import { useRouter } from 'next/navigation';
 import HomeLogin from "../buttons/HomeLogin";
 import Pp from "@/public/assets/pp.jpg";
-import Image from "next/image";
 
 const NavbarLogin = () => {
+    const [username, setUsername] = useState<string>("");
+    const router = useRouter();
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('token');
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            if (token && userData.id) {
+                try {
+                    const response = await fetch(`https://securevault-backend-plum.vercel.app/api/users/${userData.id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setUsername(data.username);
+                    } else {
+                        console.error('Failed to fetch user data');
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                }
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+        router.push('/auth/login');
+    };
+
     return (
         <div style={{ backgroundColor: '#2E073F' }} className="navbar font-[family-name:var(--font-now)]">
             <div className="navbar-start">
                 <HomeLogin/>
             </div>
             <div className="navbar-center flex">
-                {/* Visible on larger screens, hidden on mobile */}
                 <div className="text-xl hidden sm:flex">
                     <Link href="/upload" className="p-2"> Upload </Link>
                     <Link href="/gallery" className="p-2"> Galleries </Link>
                     <Link href="/about" className="p-2"> About Us </Link>
                 </div>
 
-                {/* Dropdown menu for mobile */}
                 <div className="dropdown sm:hidden">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
                     <svg
@@ -45,9 +82,10 @@ const NavbarLogin = () => {
                         <li><Link href="/gallery">Galleries</Link></li>
                         <li><Link href="/about">About Us</Link></li>
                     </ul>
-                    </div>
                 </div>
+            </div>
             <div className="navbar-end">
+                <span className="mr-2 text-white">{username}</span>
                 <div className="dropdown dropdown-end">
                     <div
                         tabIndex={0}
@@ -70,9 +108,7 @@ const NavbarLogin = () => {
                             <Link href="/profile" className="justify-between">Profile</Link>
                         </li>
                         <li>
-                            <Link href="/">  
-                                Logout
-                            </Link>
+                            <button onClick={handleLogout}>Logout</button>
                         </li>
                     </ul>
                 </div>
