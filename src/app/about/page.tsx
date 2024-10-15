@@ -15,14 +15,11 @@ export default function Home() {
                     <HomeLogin/>
                 </div>
                 <div className="navbar-center flex">
-                    {/* Visible on larger screens, hidden on mobile */}
                     <div className="text-xl hidden sm:flex">
                         <Link href="/upload" className="p-2"> Upload </Link>
                         <Link href="/gallery" className="p-2"> Galleries </Link>
                         <Link href="/about" className="p-2"> About Us </Link>
                     </div>
-
-                    {/* Dropdown menu for mobile */}
                     <div className="dropdown sm:hidden">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
                         <svg
