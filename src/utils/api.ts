@@ -47,9 +47,11 @@ const useStore = create<UserState & FileState>(
         const response = await main.get("/files/me");
         return response.data;
       },
-      getFileByFilename: async (filename: string) => { 
-        const main = getAxiosInstance(get().accessToken); 
-        const response = await main.get(`/files/${filename}`);  
+      getFileByFilename: async (filename: string) => {
+        const main = getAxiosInstance(get().accessToken);
+        const response = await main.get(`/files/${filename}`, {
+          responseType: 'blob'
+        });
         return response.data;
       },
       deleteFileById: async (fileId: string) => {

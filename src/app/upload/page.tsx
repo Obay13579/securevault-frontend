@@ -134,7 +134,7 @@ export default function Home() {
                     </div>
                     <input type="file" className="file-input file-input-bordered w-full" onChange={handleFileChange} />
                     <div className="label">
-                        <span className="text-gray-200 label-text-alt text-sm">.jpg .jpeg .png .pdf .mp4 .mov .docs .xls .xlsx</span>
+                        <span className="text-gray-200 label-text-alt text-sm">.jpg .jpeg .png .pdf .mp4 .mov .docs .xls .xlsx .etc</span>
                     </div>
                 </label>
                 <button className="btn btn-primary mt-4 w-full" onClick={handleUpload}>Upload File</button>

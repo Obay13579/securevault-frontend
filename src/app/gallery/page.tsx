@@ -27,8 +27,9 @@ export default function Home() {
     try {
       const response = await getUserFiles(); 
       console.log("Files from API:", response);
-
+  
       if (response && response.data && Array.isArray(response.data.data)) {
+        console.log("Fetched files successfully:", response.data.data);
         setFiles(response.data.data); 
       } else {
         console.error("Unexpected response structure:", response);
@@ -39,38 +40,24 @@ export default function Home() {
       setFiles([]); 
     }
   };
+  
 
   const handleDownload = async (fileId: string, filename: string) => {
     try {
-      const fileData = await getFileByFilename(filename);
-  
-      if (fileData) {
-        const blob = new Blob([fileData], { type: 'application/pdf' }); 
-        const url = URL.createObjectURL(blob);
-  
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename; 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-  
-        URL.revokeObjectURL(url);
-      } else {
-        console.error("File data not found:", fileData);
-      }
+      const fileBlob = await getFileByFilename(filename);
+      
+      const url = window.URL.createObjectURL(fileBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(`Error downloading file ${filename}:`, error);
-    }
-  };
-  
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteFileById(id); 
-      console.log(`File ${id} deleted successfully`);
-      fetchFiles(); 
-    } catch (error) {
-      console.error(`Error deleting file with id ${id}:`, error);
     }
   };
 
