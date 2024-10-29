@@ -16,7 +16,7 @@ interface File {
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]); 
   const getUserFiles = useStore((state) => state.getUserFiles); 
-  const getFileByFilename = useStore((state) => state.getFileByFilename); 
+  const getFileById = useStore((state) => state.getFileById); 
   const deleteFileById = useStore((state) => state.deleteFileById); 
 
   useEffect(() => {
@@ -28,8 +28,8 @@ export default function Home() {
       const response = await getUserFiles(); 
       console.log("Files from API:", response);
   
-      if (response && response.data && Array.isArray(response.data.data)) {
-        console.log("Fetched files successfully:", response.data.data);
+      if (response && response.data && Array.isArray(response?.data?.data)) {
+        console.log("Fetched files successfully:", response?.data?.data);
         setFiles(response.data.data); 
       } else {
         console.error("Unexpected response structure:", response);
@@ -44,7 +44,7 @@ export default function Home() {
 
   const handleDownload = async (fileId: string, filename: string) => {
     try {
-      const fileBlob = await getFileByFilename(filename);
+      const fileBlob = await getFileById(fileId); // Use fileId here
       
       const url = window.URL.createObjectURL(fileBlob);
       
