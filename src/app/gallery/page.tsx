@@ -7,10 +7,21 @@ import Pp from "@/public/assets/pp.jpg";
 import React, { useEffect, useState } from "react";
 import useStore from "@/utils/api"; 
 
+interface APIFile {
+  id: number;
+  filename: string;
+  encryptionMethod: string;
+  mimetype: string;
+  path: string;
+  createdAt: string;
+  lastModified: string;
+  size: number;
+}
+
 interface File {
-  id: string;
+  id: number;
   name: string;
-  url?: string;
+  encryptionMethod: string;
 }
 
 export default function Home() {
@@ -25,26 +36,31 @@ export default function Home() {
 
   const fetchFiles = async () => {
     try {
-      const response = await getUserFiles(); 
+      const response = await getUserFiles();
       console.log("Files from API:", response);
   
-      if (response && response.data && Array.isArray(response?.data?.data)) {
-        console.log("Fetched files successfully:", response?.data?.data);
-        setFiles(response.data.data); 
+      if (response?.data) {
+        const formattedFiles = response.data.map((file: APIFile) => ({
+          id: file.id,
+          name: file.filename,
+          encryptionMethod: file.encryptionMethod,
+        }));
+        
+        console.log("Formatted files:", formattedFiles);
+        setFiles(formattedFiles);
       } else {
-        console.error("Unexpected response structure:", response);
-        setFiles([]); 
+        console.log("No files found or invalid response format");
+        setFiles([]);
       }
     } catch (error) {
       console.error("Error fetching files:", error);
-      setFiles([]); 
+      setFiles([]);
     }
   };
-  
 
-  const handleDownload = async (fileId: string, filename: string) => {
+  const handleDownload = async (fileId: number, filename: string) => {
     try {
-      const fileBlob = await getFileById(fileId); // Use fileId here
+      const fileBlob = await getFileById(fileId.toString()); // Convert to string if API expects string ID
       
       const url = window.URL.createObjectURL(fileBlob);
       
@@ -144,6 +160,7 @@ export default function Home() {
               <div key={file.id} className="card card-compact bg-base-100 w-96 shadow-xl mb-4">
                 <div className="card-body">
                   <h3>{file.name}</h3>
+                  <p>Encryption Method: {file.encryptionMethod}</p>
                   <div className="card-actions">
                     <div className="justify-start">
                       <button
