@@ -16,8 +16,8 @@ export default function Home() {
   const router = useRouter();
 
   const { mutate: register, isLoading } = useMutation(registerUser, {
-    onSuccess: (data) => {
-      toast.success('Registration successful! You can now log in.');
+    onSuccess: async (data) => {
+      console.log(data);
       router.push('/auth/login');  
     },
     onError: (error) => {

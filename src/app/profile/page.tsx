@@ -8,6 +8,7 @@ import useStore from '@/utils/api';
 import { updateUser, deleteUser } from '@/utils/api'; 
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify'; 
+import axios, { AxiosError } from 'axios';
 
 export default function ProfileEditor() {
     const { username: initialUsername, email: initialEmail, setUsername, clearUser } = useStore((state) => state);
@@ -35,14 +36,23 @@ export default function ProfileEditor() {
     };
 
     const handleDeleteAccount = async () => {
-        try {
-            await deleteUser(); 
-            clearUser(); 
-            toast.success('Account deleted successfully!');
-            router.push('/');
-        } catch (error) {
-            console.error('Error deleting account:', error);
-            toast.error('Failed to delete account.');
+        const confirmDelete = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+        if (confirmDelete) {
+            try {
+                const response = await deleteUser();
+                console.log(response);
+                clearUser();
+                toast.success('Account deleted successfully!');
+                router.push('/');
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    const axiosError = error as AxiosError;
+                    console.error('Error deleting account:', axiosError.response?.data || axiosError.message);
+                } else {
+                    console.error('Error deleting account:', error);
+                }
+                toast.error('Failed to delete account.');
+            }
         }
     };
 
