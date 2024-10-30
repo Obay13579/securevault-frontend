@@ -69,6 +69,7 @@ export default function Home() {
                     <div className="text-xl hidden sm:flex">
                         <Link href="/upload" className="p-2"> Upload </Link>
                         <Link href="/gallery" className="p-2"> Galleries </Link>
+                        <Link href="/sharing" className="p-2"> Shared </Link>
                         <Link href="/about" className="p-2"> About Us </Link>
                     </div>
                     <div className="dropdown sm:hidden">
@@ -95,6 +96,7 @@ export default function Home() {
                         >
                             <li><Link href="/upload">Upload</Link></li>
                             <li><Link href="/gallery">Galleries</Link></li>
+                            <li><Link href="/sharing">Shared</Link></li>
                             <li><Link href="/about">About Us</Link></li>
                         </ul>
                         </div>
