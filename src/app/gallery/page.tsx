@@ -27,8 +27,7 @@ interface File {
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]); 
   const getUserFiles = useStore((state) => state.getUserFiles); 
-  const getFileById = useStore((state) => state.getFileById); 
-  const deleteFileById = useStore((state) => state.deleteFileById); 
+  const getFileById = useStore((state) => state.getFileById);
 
   useEffect(() => {
     fetchFiles();
@@ -60,7 +59,7 @@ export default function Home() {
 
   const handleDownload = async (fileId: number, filename: string) => {
     try {
-      const fileBlob = await getFileById(fileId.toString()); // Convert to string if API expects string ID
+      const fileBlob = await getFileById(fileId.toString());
       
       const url = window.URL.createObjectURL(fileBlob);
       
