@@ -7,17 +7,27 @@ import Pp from "@/public/assets/pp.jpg";
 import React, { useEffect, useState } from "react";
 import useStore from "@/utils/api"; 
 
+interface APIFile {
+  id: number;
+  filename: string;
+  encryptionMethod: string;
+  mimetype: string;
+  path: string;
+  createdAt: string;
+  lastModified: string;
+  size: number;
+}
+
 interface File {
-  id: string;
+  id: number;
   name: string;
-  url?: string;
+  encryptionMethod: string;
 }
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]); 
   const getUserFiles = useStore((state) => state.getUserFiles); 
-  const getFileByFilename = useStore((state) => state.getFileByFilename); 
-  const deleteFileById = useStore((state) => state.deleteFileById); 
+  const getFileById = useStore((state) => state.getFileById);
 
   useEffect(() => {
     fetchFiles();
@@ -25,26 +35,31 @@ export default function Home() {
 
   const fetchFiles = async () => {
     try {
-      const response = await getUserFiles(); 
+      const response = await getUserFiles();
       console.log("Files from API:", response);
   
-      if (response && response.data && Array.isArray(response.data.data)) {
-        console.log("Fetched files successfully:", response.data.data);
-        setFiles(response.data.data); 
+      if (response?.data) {
+        const formattedFiles = response.data.map((file: APIFile) => ({
+          id: file.id,
+          name: file.filename,
+          encryptionMethod: file.encryptionMethod,
+        }));
+        
+        console.log("Formatted files:", formattedFiles);
+        setFiles(formattedFiles);
       } else {
-        console.error("Unexpected response structure:", response);
-        setFiles([]); 
+        console.log("No files found or invalid response format");
+        setFiles([]);
       }
     } catch (error) {
       console.error("Error fetching files:", error);
-      setFiles([]); 
+      setFiles([]);
     }
   };
-  
 
-  const handleDownload = async (fileId: string, filename: string) => {
+  const handleDownload = async (fileId: number, filename: string) => {
     try {
-      const fileBlob = await getFileByFilename(filename);
+      const fileBlob = await getFileById(fileId.toString());
       
       const url = window.URL.createObjectURL(fileBlob);
       
@@ -71,6 +86,7 @@ export default function Home() {
           <div className="text-xl hidden sm:flex">
             <Link href="/upload" className="p-2"> Upload </Link>
             <Link href="/gallery" className="p-2"> Galleries </Link>
+            <Link href="/sharing" className="p-2"> Shared </Link>
             <Link href="/about" className="p-2"> About Us </Link>
           </div>
           <div className="dropdown sm:hidden">
@@ -97,6 +113,7 @@ export default function Home() {
             >
               <li><Link href="/upload">Upload</Link></li>
               <li><Link href="/gallery">Galleries</Link></li>
+              <li><Link href="/sharing">Shared</Link></li>
               <li><Link href="/about">About Us</Link></li>
             </ul>
           </div>
@@ -144,6 +161,7 @@ export default function Home() {
               <div key={file.id} className="card card-compact bg-base-100 w-96 shadow-xl mb-4">
                 <div className="card-body">
                   <h3>{file.name}</h3>
+                  <p>Encryption Method: {file.encryptionMethod}</p>
                   <div className="card-actions">
                     <div className="justify-start">
                       <button

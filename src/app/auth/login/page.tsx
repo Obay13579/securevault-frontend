@@ -14,7 +14,6 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const setAccessToken = useStore((state) => state.setAccessToken);
-    const setUsername = useStore((state) => state.setUsername);
     const router = useRouter();
 
     const { mutate: login, isLoading } = useMutation(loginUser, {
@@ -26,9 +25,6 @@ export default function Login() {
             try {
                 const user = await getAuthenticatedUser(); 
                 if (user) {
-                    const { username } = user; 
-                    setUsername(username); 
-                    console.log(username); 
                     toast.success('Login successful!');
                     router.push('/dashboard');  
                 } else {
