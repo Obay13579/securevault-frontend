@@ -37,11 +37,12 @@ interface SharedFile {
     sharedAt: string;
     expiresAt: string;
 }
+
 interface ShareKeyDialogProps {
     isOpen: boolean;
     onClose: () => void;
     encryptedKey: string;
-  }
+}
   
   const ShareKeyDialog = ({ isOpen, onClose, encryptedKey }: ShareKeyDialogProps) => {
     const [copySuccess, setCopySuccess] = useState(false);
@@ -102,6 +103,7 @@ export default function Home() {
         requestFileShare,
         getPendingRequests,
         acceptShareRequest,
+        rejectShareRequest,
         getSharedFilesList,
         getSharedFile,
         getUserFiles,
@@ -117,6 +119,7 @@ export default function Home() {
     const [selectedFileForDownload, setSelectedFileForDownload] = useState<string | null>(null);
     const [showEncryptionKey, setShowEncryptionKey] = useState(false);
     const [currentEncryptionKey, setCurrentEncryptionKey] = useState('');
+    const [isRejecting, setIsRejecting] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         fetchCurrentUser().then(() => fetchData());
@@ -193,6 +196,24 @@ export default function Home() {
             }
         } finally {
             setIsAccepting(prev => ({ ...prev, [fileId]: false }));
+        }
+    };
+
+    const handleRejectRequest = async (fileId: string) => {
+        try {
+            setIsRejecting(prev => ({ ...prev, [fileId]: true }));
+            await rejectShareRequest(fileId);
+            alert('Request rejected successfully');
+            await fetchData(); // Refresh the data after rejection
+        } catch (error) {
+            console.error('Error rejecting share request:', error);
+            if (error instanceof Error) {
+                alert(`Failed to reject request: ${error.message}`);
+            } else {
+                alert('Failed to reject request. Please try again.');
+            }
+        } finally {
+            setIsRejecting(prev => ({ ...prev, [fileId]: false }));
         }
     };
 
@@ -390,6 +411,13 @@ export default function Home() {
                                             disabled={isAccepting[request.id]}
                                             >
                                             {isAccepting[request.id] ? 'Accepting...' : 'Accept'}
+                                        </button>
+                                        <button
+                                            className="btn bg-red-600 hover:bg-red-700 text-white"
+                                            onClick={() => handleRejectRequest(request.id.toString())}
+                                            disabled={isAccepting[request.id] || isRejecting[request.id]}
+                                        >
+                                            {isRejecting[request.id] ? 'Rejecting...' : 'Reject'}
                                         </button>
                                     </div>
                                 </div>

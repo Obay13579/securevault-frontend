@@ -33,14 +33,13 @@
   }
 
   interface ShareState {
-    // For users requesting files
     requestFileShare: (fileId: string) => Promise<any>;
     getSharedFilesList: () => Promise<any>;
     getSharedFile: (fileId: string, password: string, encryptedKey: string) => Promise<SharedFileResponse>;
     
-    // For users receiving requests
     getPendingRequests: () => Promise<any>;
     acceptShareRequest: (fileId: string) => Promise<ShareResponse>;
+    rejectShareRequest: (fileId: string) => Promise<any>;
   }
 
 
@@ -97,12 +96,9 @@
         },
         getSharedFile: async (fileId: string, password: string, encryptedKey: string): Promise<SharedFileResponse> => {
           const main = getAxiosInstance(get().accessToken);
-          
-          // Clean and encode the encrypted key properly
+
           const cleanEncryptedKey = encryptedKey.trim();
-          
-          // Ensure the encrypted key is properly formatted
-          // If it's base64, it should be properly padded
+
           let formattedKey = cleanEncryptedKey;
           if (formattedKey.includes(' ')) {
             formattedKey = formattedKey.replace(/\s/g, '+');
@@ -130,7 +126,6 @@
               }
             );
         
-            // Handle JSON error responses
             if (response.data instanceof Blob && response.data.type.includes('json')) {
               const text = await response.data.text();
               try {
@@ -144,7 +139,6 @@
               }
             }
         
-            // Handle successful file download
             const contentDisposition = response.headers['content-disposition'];
             let fileName = '';
             if (contentDisposition) {
@@ -162,7 +156,6 @@
         
           } catch (error) {
             if (axios.isAxiosError(error)) {
-              // Handle error response
               if (error.response?.data instanceof Blob) {
                 try {
                   const text = await error.response.data.text();
@@ -207,6 +200,15 @@
           } catch (error) {
             console.error('Error in acceptShareRequest:', error);
             throw error; 
+          }
+        },        rejectShareRequest: async (fileId: string) => {
+          const main = getAxiosInstance(get().accessToken);
+          try {
+            const response = await main.post(`/share/reject/${fileId}`);
+            return response.data;
+          } catch (error) {
+            console.error('Error in rejectShareRequest:', error);
+            throw error;
           }
         },
       }),
