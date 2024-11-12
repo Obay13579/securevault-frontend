@@ -30,6 +30,7 @@
     getUserFiles: () => Promise<any>;
     getFileById: (fileId: string) => Promise<any>; 
     deleteFileById: (fileId: string) => Promise<any>;
+    getAllFiles: () => Promise<any>;
   }
 
   interface ShareState {
@@ -42,7 +43,15 @@
     rejectShareRequest: (fileId: string) => Promise<any>;
   }
 
-
+  interface AvailableFile {
+    id: number;
+    filename: string;
+    mimetype: string;
+    fileFromUser: {
+      username: string;
+      email: string;
+    };
+  }
 
   type MyPersist = (
     config: StateCreator<UserState & FileState & ShareState>,
@@ -92,6 +101,11 @@
         getSharedFilesList: async () => {
           const main = getAxiosInstance(get().accessToken);
           const response = await main.get('/share/files');
+          return response.data;
+        },
+        getAllFiles: async () => {
+          const main = getAxiosInstance(get().accessToken);
+          const response = await main.get("/files/all");
           return response.data;
         },
         getSharedFile: async (fileId: string, password: string, encryptedKey: string): Promise<SharedFileResponse> => {

@@ -44,59 +44,69 @@ interface ShareKeyDialogProps {
     encryptedKey: string;
 }
   
-  const ShareKeyDialog = ({ isOpen, onClose, encryptedKey }: ShareKeyDialogProps) => {
-    const [copySuccess, setCopySuccess] = useState(false);
-  
-    const handleCopy = async () => {
-      try {
-        await navigator.clipboard.writeText(encryptedKey);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy:', err);
-      }
+interface AvailableFile {
+    id: number;
+    filename: string;
+    mimetype: string;
+    fileFromUser: {
+        username: string;
+        email: string;
     };
-  
-    if (!isOpen) return null;
-  
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-[#2E073F] p-6 rounded-lg max-w-2xl w-full mx-4">
-          <h3 className="text-xl font-bold text-gray-200 mb-4">Share Request Accepted</h3>
-          <p className="text-gray-200 mb-2">Please save this encryption key - you'll need it to download the file:</p>
-          <div className="relative">
-            <textarea
-              readOnly
-              value={encryptedKey}
-              className="w-full h-24 p-2 bg-[#7A1CAC] text-gray-200 rounded mb-4 font-mono text-sm"
-            />
-            <button
-              onClick={handleCopy}
-              className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-            >
-              {copySuccess ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-          <div className="text-gray-200 text-sm mb-4">
-            <p>⚠️ Make sure to:</p>
-            <ul className="list-disc pl-5">
-              <li>Copy and save this key immediately</li>
-              <li>You'll need it to download the shared file</li>
-              <li>This key won't be shown again</li>
-            </ul>
-          </div>
-          <div className="flex justify-end">
-            <button
-              onClick={onClose}
-              className="bg-[#7A1CAC] text-white px-4 py-2 rounded hover:bg-opacity-90"
-            >
-              Close
-            </button>
-          </div>
+}
+
+const ShareKeyDialog = ({ isOpen, onClose, encryptedKey }: ShareKeyDialogProps) => {
+const [copySuccess, setCopySuccess] = useState(false);
+
+const handleCopy = async () => {
+    try {
+    await navigator.clipboard.writeText(encryptedKey);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+    console.error('Failed to copy:', err);
+    }
+};
+
+if (!isOpen) return null;
+
+return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-[#2E073F] p-6 rounded-lg max-w-2xl w-full mx-4">
+        <h3 className="text-xl font-bold text-gray-200 mb-4">Share Request Accepted</h3>
+        <p className="text-gray-200 mb-2">Please save this encryption key - you'll need it to download the file:</p>
+        <div className="relative">
+        <textarea
+            readOnly
+            value={encryptedKey}
+            className="w-full h-24 p-2 bg-[#7A1CAC] text-gray-200 rounded mb-4 font-mono text-sm"
+        />
+        <button
+            onClick={handleCopy}
+            className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+        >
+            {copySuccess ? 'Copied!' : 'Copy'}
+        </button>
         </div>
-      </div>
-    );
-  };
+        <div className="text-gray-200 text-sm mb-4">
+        <p>⚠️ Make sure to:</p>
+        <ul className="list-disc pl-5">
+            <li>Copy and save this key immediately</li>
+            <li>You'll need it to download the shared file</li>
+            <li>This key won't be shown again</li>
+        </ul>
+        </div>
+        <div className="flex justify-end">
+        <button
+            onClick={onClose}
+            className="bg-[#7A1CAC] text-white px-4 py-2 rounded hover:bg-opacity-90"
+        >
+            Close
+        </button>
+        </div>
+    </div>
+    </div>
+);
+};
 
 export default function Home() {
     const { 
@@ -107,6 +117,7 @@ export default function Home() {
         getSharedFilesList,
         getSharedFile,
         getUserFiles,
+        getAllFiles,
     } = useStore();
 
     const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
@@ -120,10 +131,27 @@ export default function Home() {
     const [showEncryptionKey, setShowEncryptionKey] = useState(false);
     const [currentEncryptionKey, setCurrentEncryptionKey] = useState('');
     const [isRejecting, setIsRejecting] = useState<Record<string, boolean>>({});
+    const [availableFiles, setAvailableFiles] = useState<AvailableFile[]>([]);
+    const [isLoadingFiles, setIsLoadingFiles] = useState(true);
 
     useEffect(() => {
-        fetchCurrentUser().then(() => fetchData());
+        fetchCurrentUser().then(() => {
+            fetchData();
+            fetchAvailableFiles(); 
+        });
     }, []);
+
+    const fetchAvailableFiles = async () => {
+        try {
+            setIsLoadingFiles(true);
+            const files = await getAllFiles();
+            setAvailableFiles(Array.isArray(files) ? files : files.data || []);
+        } catch (error) {
+            console.error("Error fetching available files:", error);
+        } finally {
+            setIsLoadingFiles(false);
+        }
+    };
 
     const fetchCurrentUser = async () => {
         try {
@@ -204,7 +232,7 @@ export default function Home() {
             setIsRejecting(prev => ({ ...prev, [fileId]: true }));
             await rejectShareRequest(fileId);
             alert('Request rejected successfully');
-            await fetchData(); // Refresh the data after rejection
+            await fetchData(); 
         } catch (error) {
             console.error('Error rejecting share request:', error);
             if (error instanceof Error) {
@@ -232,7 +260,6 @@ export default function Home() {
 
     const handleDownloadSharedFile = async (fileId: string, password: string, encryptedKey: string) => {
         try {
-          // Input validation
           if (!password) {
             alert('Password is required');
             return;
@@ -242,14 +269,12 @@ export default function Home() {
             return;
           }
       
-          // Enhanced key formatting
           let formattedKey = encryptedKey
             .trim()
-            .replace(/\s+/g, '+')     // Replace any whitespace with +
-            .replace(/-/g, '+')       // Replace any - with +
-            .replace(/_/g, '/');      // Replace any _ with /
+            .replace(/\s+/g, '+')     
+            .replace(/-/g, '+')       
+            .replace(/_/g, '/');      
       
-          // Add proper base64 padding if missing
           while (formattedKey.length % 4) {
             formattedKey += '=';
           }
@@ -257,7 +282,6 @@ export default function Home() {
           console.log('Attempting download with formatted key:', {
             fileId,
             keyLength: formattedKey.length,
-            // Log first and last 4 chars of key for debugging (avoid logging sensitive data)
             keyPreview: `${formattedKey.slice(0,4)}...${formattedKey.slice(-4)}`
           });
       
@@ -274,7 +298,6 @@ export default function Home() {
             return;
           }
       
-          // Create a Blob URL and trigger download
           const blob = new Blob([response.data], { 
             type: response.data.type || 'application/octet-stream' 
           });
@@ -287,7 +310,6 @@ export default function Home() {
           link.click();
           document.body.removeChild(link);
           
-          // Cleanup
           window.URL.revokeObjectURL(url);
           setIsDownloadDialogOpen(false);
           setSelectedFileForDownload(null);
@@ -372,26 +394,37 @@ export default function Home() {
                 </div>         
             </div>
             <div className="flex flex-1 flex-wrap">
-                <div className="mb-6 m-4 w-full md:w-auto">
-                    <div className="bg-[#2E073F] p-4 rounded-lg">
-                        <h2 className="text-xl font-bold text-gray-200 mb-4">Request File Access</h2>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="Enter File ID"
-                                value={selectedFileId || ''}
-                                onChange={(e) => setSelectedFileId(e.target.value)}
-                                className="bg-[#7A1CAC] text-gray-200 rounded-lg px-4 py-2 flex-1"
-                            />
-                            <button
-                                className="bg-blue-600 hover:bg-blue-700 text-gray-200 px-4 py-2 rounded-lg"
-                                onClick={() => selectedFileId && handleRequestFile(selectedFileId)}
-                                disabled={!selectedFileId}
-                            >
-                                Request Access
-                            </button>
-                        </div>
-                    </div>
+                <div className="w-full md:w-auto max-w-md p-8 m-2 rounded-xl shadow-md" style={{ backgroundColor: "#2E073F" }}>
+                    <h2 className="text-gray-200 text-xl mb-4">Available Files</h2>
+                    {isLoadingFiles ? (
+                        <p className="text-gray-200">Loading available files...</p>
+                    ) : availableFiles.length === 0 ? (
+                        <p className="text-gray-200">No files available.</p>
+                    ) : (
+                        availableFiles.map((file) => (
+                            <div key={file.id} className="card card-compact bg-base-100 w-96 shadow-xl mb-4">
+                                <div className="card-body">
+                                    <h3 className="card-title text-lg">
+                                        <span className="font-medium">File ID:</span> {file.id}
+                                    </h3>
+                                    <p className="text-sm">
+                                        <span className="font-medium">Filename:</span> {file.filename}
+                                    </p>
+                                    <p className="text-sm">
+                                        <span className="font-medium">Owner:</span> {file.fileFromUser.username}
+                                    </p>
+                                    <div className="card-actions justify-end mt-2">
+                                        <button 
+                                            onClick={() => handleRequestFile(file.id.toString())}
+                                            className="btn bg-[#7A1CAC] hover:bg-opacity-90 text-white"
+                                        >
+                                            Request Access
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
                 <div className="w-full md:w-auto max-w-md p-8 m-2 rounded-xl shadow-md" style={{ backgroundColor: "#2E073F" }}>
                     <h2 className="text-gray-200 text-xl mb-4">Pending Requests</h2>
