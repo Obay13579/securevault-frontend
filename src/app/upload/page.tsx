@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [encryptionMethod, setEncryptionMethod] = useState("AES");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const uploadFile = useStore((state) => state.uploadFile);
   const router = useRouter();
 
@@ -41,22 +43,43 @@ export default function Home() {
       const handleEncryptionMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setEncryptionMethod(e.target.value);
       };
+
+      const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
+      };
     
       const handleUpload = async () => {
+        if (!file) {
+            alert("Please select a file to upload.");
+            return;
+          }
+      
+          if (!password) {
+            alert("Please enter your password to confirm the upload.");
+            return;
+          }
+
         if (file) {
           const formData = new FormData();
           formData.append("file", file);
           formData.append("encryptionMethod", encryptionMethod);
+          formData.append("password", password);
     
           try {
             const response = await uploadFile(formData);
             console.log(response)
             alert("File uploaded successfully!");
+            setFile(null);
+            setPassword("");
           } catch (error) {
             console.error("File upload error:", error);
             alert("Failed to upload file.");
           }
         }
+      };
+      
+      const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
       };
     
     return (
@@ -157,6 +180,26 @@ export default function Home() {
                     <option value="RC4">RC4</option>
                     <option value="DES">DES</option>
                     </select>
+                </label>
+                <label className="form-control w-full mt-4">
+                    <div className="label">
+                    <span className="text-gray-200 label-text text-lg font-semibold">Confirm Password</span>
+                    </div>
+                    <div className="relative">
+                    <input 
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        className="input input-bordered w-full" 
+                        value={password}
+                        onChange={handlePasswordChange}
+                    />
+                    <button 
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        onClick={togglePasswordVisibility}
+                    >
+                        {showPassword ? "Hide" : "Show"}
+                    </button>
+                    </div>
                 </label>
                 <button className="btn btn-primary mt-4 w-full" onClick={handleUpload}>
                     Upload File
